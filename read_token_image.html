@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Image Fetcher</title>
+</head>
+<body>
+
+    <h1>GitHub Image Fetcher</h1>
+    <button onclick="fetchPrivateGitHubFile()">Fetch File</button>
+    <pre id="image-container">File content will appear here...</pre>
+
+    <script>
+        async function fetchPrivateGitHubFile() {
+        const username = 'github_username'; // Replace with your GitHub username
+        const repoName = 'repository'; // Replace with your repository name
+        const filePath = 'folder/file.extension';  // Replace with the correct file path in the repo
+        const token = 'ghp_yourClassicTokenHere';  // Replace with your personal access token
+
+        const url = `https://api.github.com/repos/${username}/${repoName}/contents/${filePath}`;
+
+        // Fetch the image from GitHub API
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                "Accept": "application/vnd.github.v3+json"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.content) {
+                // GitHub returns the file content as Base64 if the file is small
+                const base64Image = data.content;
+                const imageUrl = `data:${data.encoding};base64,${base64Image}`;
+                
+                // Create an image element and set its src to the Base64 URL
+                const img = new Image();
+                img.src = imageUrl;
+
+                // Append the image to the DOM (inside the image container)
+                document.getElementById('image-container').appendChild(img);
+            } else {
+                console.error('Error: Image not found or the file is too large.');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching image from GitHub:', error);
+        });
+    }
+    </script>
+
+</body>
+</html>

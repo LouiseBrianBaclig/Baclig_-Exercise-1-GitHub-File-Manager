@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload to Private GitHub Repo</title>
+</head>
+<body>
+    <input type="file" id="fileInput">
+    <button onclick="uploadFile()">Upload to Private Repo</button>
+
+    <script>
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput.files.length) {
+                alert("Please select a file first.");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function(event) {
+                const content = event.target.result.split(',')[1]; // Get base64 data
+                
+                // Replace with your GitHub credentials
+                const githubUsername = 'github_username'; 
+                const repo = 'repository';
+                const path = `folderIfAny/${file.name}`; // Path inside the repo
+                const token = "ghp_yourClassicTokenHere"; 
+
+                const apiUrl = `https://api.github.com/repos/${githubUsername}/${repo}/contents/${path}`;
+
+                const data = {
+                    message: `Adding ${file.name} to private repo`,
+                    content: content
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: "PUT",
+                        headers: {
+                            "Authorization": `token ${token}`,  // Authenticate using PAT
+                            "Accept": "application/vnd.github.v3+json",
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    if (response.ok) {
+                        alert(`File uploaded successfully! View it here: ${result.content.html_url}`);
+                    } else {
+                        alert(`Error: ${result.message}`);
+                    }
+                } catch (error) {
+                    console.error("Error uploading file:", error);
+                    alert("Upload failed.");
+                }
+            };
+
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>
