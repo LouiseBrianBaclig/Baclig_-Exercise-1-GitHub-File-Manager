@@ -1,404 +1,268 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Cloud Notepad</title>
-    <style>
-        :root{
-            --bg:#071428; --card:#071025; --muted:#9fb0c8; --accent:#6d28d9; --accent-2:#0891b2; --glass: rgba(255,255,255,0.03);
-            --success:#10b981; --danger:#ef4444; --surface:#061026;
-            --radius:12px; --pad:14px;
-        }
-        *{box-sizing:border-box}
-        html,body{height:100%}
-        body { background: linear-gradient(180deg, #07122a 0%, #021026 100%); color: #e6eef8; font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; display:flex; align-items:flex-start; justify-content:center; padding:28px }
+<meta charset="UTF-8">
+<title>Cloud Notepad</title>
 
-    .container{ width:100%; max-width:1100px; background: linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.008)); border-radius:18px; padding:20px; box-shadow: 0 10px 36px rgba(2,6,23,0.62); border:1px solid rgba(255,255,255,0.03) }
+<style>
+:root {
+    --primary: #4f46e5;
+    --secondary: #22c55e;
+    --danger: #ef4444;
+    --bg1: #0f172a;
+    --bg2: #020617;
+    --glass: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.15);
+}
 
-        header{ display:flex; align-items:center; gap:16px; }
-    .logo{ width:56px; height:56px; border-radius:12px; background: linear-gradient(135deg,var(--accent),var(--accent-2)); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:20px; color:white; box-shadow: 0 8px 20px rgba(103,65,225,0.18) }
-        h1{ margin:0; font-size:20px }
-        p.lead{ margin:0; color:var(--muted); font-size:13px }
+* {
+    box-sizing: border-box;
+}
 
-        .grid{ display:grid; grid-template-columns: 1fr 420px; gap:18px; margin-top:18px }
+body {
+    min-height: 100vh;
+    margin: 0;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    background: radial-gradient(circle at top, #1e293b, var(--bg2));
+    color: #e5e7eb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+}
 
-    .panel{ background: linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.006)); padding:var(--pad); border-radius:var(--radius); border:1px solid rgba(255,255,255,0.03); backdrop-filter: blur(6px) }
+.app {
+    width: 100%;
+    max-width: 900px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    backdrop-filter: blur(18px);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+    padding: 30px;
+}
 
-        label { display:block; margin-top:6px; font-weight:600; color:#cfe1ff }
-    input[type=text], input[type=password], select { width:100%; padding:10px 12px; margin-top:8px; background: linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.004)); border-radius:10px; border:1px solid rgba(255,255,255,0.03); color:inherit; box-shadow: inset 0 -6px 12px rgba(2,6,23,0.25) }
-    input[type=text]:focus, input[type=password]:focus, select:focus{ outline:none; border-color: rgba(124,58,237,0.9); box-shadow: 0 6px 22px rgba(99,102,241,0.08); transform: translateY(-1px); transition: all 160ms ease }
-        .row { display:flex; gap:8px; }
-        .row > * { flex:1 }
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
 
-    #editor { width:100%; height:520px; padding:16px; box-sizing:border-box; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Courier New', monospace; font-size:14px; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.002)); border-radius:12px; border:1px solid rgba(255,255,255,0.02); color:#e6eef8; resize:vertical; box-shadow: inset 0 4px 18px rgba(2,6,23,0.38) }
-    #editor:focus{ outline:none; border-color: rgba(8,145,178,0.9); box-shadow: 0 12px 40px rgba(6,129,168,0.08) }
+header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
 
-    .controls{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap }
-    button{ background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.008)); color:inherit; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.03); cursor:pointer; transition: transform 150ms ease, box-shadow 150ms ease }
-    button:hover{ transform: translateY(-3px); box-shadow: 0 10px 30px rgba(2,6,23,0.32) }
-    .btn-primary{ background: linear-gradient(90deg,var(--accent),#5b21b6); box-shadow: 0 8px 24px rgba(109,40,217,0.12); border:none; color:white }
-    .btn-success{ background: linear-gradient(90deg, #06b6d4, #0891b2); color:white }
-    .btn-danger{ background: linear-gradient(90deg,#fb7185,#ef4444); color:white }
+header span {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
 
-        #status{ margin-top:12px; padding:12px; border-radius:10px; display:none }
-        #status.ok{ background: rgba(16,185,129,0.12); color: #bbf7d0; display:block }
-        #status.err{ background: rgba(239,68,68,0.08); color: #ffdada; display:block }
+label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0.85;
+}
 
-    .meta{ font-size:13px; color:var(--muted); margin-top:8px }
-        .small{ font-size:12px; color:var(--muted) }
+input {
+    width: 100%;
+    margin-top: 6px;
+    padding: 12px 14px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: white;
+    outline: none;
+}
 
-        .token-row{ display:flex; gap:8px; align-items:center; margin-top:8px }
-        .token-row button{ padding:8px 10px; font-size:13px }
+input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(79,70,229,0.3);
+}
 
-        footer{ margin-top:16px; color:var(--muted); font-size:12px }
+textarea {
+    width: 100%;
+    height: 320px;
+    margin-top: 15px;
+    padding: 15px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: #f8fafc;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+}
 
-        @media(max-width:980px){ .grid{ grid-template-columns: 1fr; } #editor{ height:360px } }
+textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(79,70,229,0.3);
+}
 
-    /* custom scrollbar for editor */
-    #editor::-webkit-scrollbar{ width:12px }
-    #editor::-webkit-scrollbar-track{ background: transparent }
-    #editor::-webkit-scrollbar-thumb{ background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border-radius:8px; border:3px solid transparent; background-clip: padding-box }
-    </style>
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    color: white;
+    background: linear-gradient(135deg, var(--primary), #6366f1);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(79,70,229,0.4);
+    opacity: 0.95;
+}
+
+button.secondary {
+    background: linear-gradient(135deg, var(--secondary), #4ade80);
+}
+
+button.danger {
+    background: linear-gradient(135deg, var(--danger), #f87171);
+}
+
+#status {
+    margin-top: 18px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+}
+
+footer {
+    margin-top: 25px;
+    text-align: center;
+    font-size: 0.75rem;
+    opacity: 0.5;
+}
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">NP</div>
-            <div>
-                <h1>Cloud Notepad</h1>
-                <p class="lead">Fast browser editor — load & save files directly to GitHub. No backend required.</p>
-            </div>
-        </header>
 
-        <div class="grid">
-            <div class="panel">
-                <div class="row">
-                    <div style="flex:1">
-                        <label for="owner">Owner</label>
-                        <input id="owner" type="text" placeholder="github_username or org" value="github_username">
-                    </div>
-                    <div style="flex:1">
-                        <label for="repo">Repository</label>
-                        <input id="repo" type="text" placeholder="repository" value="repository">
-                    </div>
-                </div>
+<div class="app">
+    <header>
+        <h1>☁ Cloud Notepad</h1>
+        <span>GitHub-Powered Editor</span>
+    </header>
 
-                <div class="row" style="margin-top:8px; align-items:flex-end">
-                    <div style="flex:1">
-                        <label for="branch">Branch</label>
-                        <input id="branch" type="text" value="main">
-                    </div>
-                    <div style="flex:1; position:relative">
-                        <label for="path">File path</label>
-                        <div style="position:relative">
-                            <input id="path" type="text" placeholder="notes.txt or folder/notes.txt" style="padding-right:40px">
-                            <button id="chooseFileBtn" title="Upload local file" style="position:absolute; right:6px; top:6px; background:transparent; border:none; padding:6px; display:flex; align-items:center; justify-content:center">
-                                <!-- folder icon -->
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted)">
-                                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6l2 2h6a2 2 0 0 1 2 2z"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+    <label>File name</label>
+    <input id="filename" placeholder="example.txt">
 
-                <label for="token">Personal Access Token (PAT)</label>
-                <div class="token-row">
-                    <div style="position:relative; flex:1; display:flex; align-items:center">
-                        <input id="token" type="password" placeholder="ghp_... or gho_..." autocomplete="new-password" style="padding-right:40px">
-                        <button id="toggleTokenBtn" aria-pressed="false" aria-label="Show token" title="Show token" style="position:absolute; right:8px; background:transparent; border:none; padding:6px; display:flex; align-items:center; justify-content:center">
-                            <!-- eye icon -->
-                            <svg id="toggleIcon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted)">
-                                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg>
-                        </button>
-                    </div>
-                    <button id="saveTokenBtn" class="small">Save token</button>
-                    <button id="clearTokenBtn" class="small">Clear token</button>
-                </div>
-                <div class="meta">Token is stored only in this browser's session (sessionStorage) when you click Save token.</div>
+    <textarea id="editor" placeholder="Write something meaningful…"></textarea>
 
-                <div class="controls">
-                    <button id="loadBtn" class="btn-primary">Load File</button>
-                    <button id="saveBtn" class="btn-success">Save File</button>
-                    <button id="clearBtn" class="btn-danger">Clear Text</button>
-                    <label class="small" style="align-self:center;margin-left:6px">Autosave
-                        <input id="autosave" type="checkbox" style="margin-left:6px">
-                    </label>
-                </div>
-
-                <div id="status" role="status"></div>
-                <div class="meta">Note: Use tokens with <code>repo</code> or <code>public_repo</code> scope. Choose expiration &gt;= 90 days.</div>
-                <footer>Tip: Press <strong>Ctrl/Cmd+S</strong> to save while focused in the editor.</footer>
-                <div id="uploadedPath" class="meta" style="margin-top:8px"></div>
-                <input id="localFileInput" type="file" style="display:none" />
-            </div>
-
-            <div class="panel">
-                <label for="editor">Editor</label>
-                <textarea id="editor" placeholder="Write your notes here..."></textarea>
-            </div>
-        </div>
+    <div class="actions">
+        <button onclick="loadFile()">Load</button>
+        <button class="secondary" onclick="saveFile()">Save</button>
+        <button class="danger" onclick="clearText()">Clear</button>
     </div>
 
-    <script>
+    <div id="status">Ready.</div>
 
-        // Status helpers
-        const statusEl = document.getElementById('status');
-        let statusTimer = null;
-        function showStatus(message, ok = true, timeout = 6000) {
-            statusEl.textContent = message;
-            statusEl.className = ok ? 'ok' : 'err';
-            statusEl.style.display = 'block';
-            if (statusTimer) clearTimeout(statusTimer);
-            if (timeout) statusTimer = setTimeout(() => { statusEl.style.display = 'none'; statusTimer = null; }, timeout);
-        }
-        function hideStatus() { if (statusTimer) clearTimeout(statusTimer); statusEl.style.display = 'none'; }
+    <footer>
+        Secure Cloud Text Editor · Built with GitHub API
+    </footer>
+</div>
 
-        async function getFileFromGitHub(owner, repo, path, branch, token) {
-            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}?ref=${encodeURIComponent(branch)}`;
-            const headers = { 'Accept': 'application/vnd.github.v3+json' };
-            if (token) headers['Authorization'] = `Bearer ${token}`;
+<script>
+const OWNER = "LouiseBrianBaclig";
+const REPO = "Baclig_-Exercise-1-GitHub-File-Manager";
+const FOLDER = "Data";
+const BRANCH = "main";
+const TOKEN = "github_pat_XXXXXXXXXXXXXXXXXXXXXXXX"; // ⚠️ MOVE TO BACKEND IN REAL PROJECT
 
-            const resp = await fetch(url, { headers });
-            if (resp.status === 404) {
-                throw { code:404, message: 'File not found' };
-            }
-            if (!resp.ok) {
-                const txt = await resp.text();
-                throw { code: resp.status, message: txt };
-            }
-            const data = await resp.json();
-            // data.content is base64 content. data.encoding should be "base64"
-            if (!data.content) throw { code:500, message:'No content in response' };
-            // Some GitHub responses include newlines in base64; remove them
-            const cleaned = data.content.replace(/\n/g, '');
-            try {
-                // decode base64 to UTF-8
-                const decoded = decodeURIComponent(Array.prototype.map.call(atob(cleaned), function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-                return { content: decoded, sha: data.sha };
-            } catch (e) {
-                throw { code:500, message: 'Failed to decode file content' };
-            }
-        }
+const statusEl = document.getElementById("status");
+let currentFileSha = null;
 
-        async function putFileToGitHub(owner, repo, path, branch, token, contentText, message, sha, rawBase64, mime) {
-            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`;
-            const headers = { 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
-            if (token) headers['Authorization'] = `Bearer ${token}`;
+function setStatus(msg, color = "#e5e7eb") {
+    statusEl.textContent = msg;
+    statusEl.style.color = color;
+}
 
-            // Encode to base64
-            // btoa works for ASCII/Latin1; to support arbitrary Unicode, convert properly
-            function toBase64Unicode(str) { return btoa(unescape(encodeURIComponent(str))); }
+async function loadFile() {
+    const filename = filenameInput().trim();
+    if (!filename) return setStatus("❌ File name required", "#f87171");
 
-            const contentField = rawBase64 ? rawBase64 : toBase64Unicode(contentText || '');
-            const body = {
-                message: message || `Update ${path}`,
-                content: contentField,
-                branch: branch
-            };
-            // If uploading binary, optionally set content-type in the commit message or use API parameters if needed
-            if (sha) body.sha = sha; // required when updating existing file
+    try {
+        const res = await fetch(apiUrl(filename), auth());
+        if (!res.ok) throw new Error();
 
-            const resp = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
-            const data = await resp.json();
-            if (!resp.ok) {
-                throw { code: resp.status, message: (data && data.message) ? data.message : JSON.stringify(data) };
-            }
-            return data;
-        }
+        const data = await res.json();
+        editor().value = atob(data.content);
+        currentFileSha = data.sha;
+        setStatus("✅ File loaded successfully", "#4ade80");
+    } catch {
+        currentFileSha = null;
+        setStatus("⚠️ Failed to load file", "#f87171");
+    }
+}
 
-        document.getElementById('loadBtn').addEventListener('click', async () => {
-            hideStatus();
-            const owner = document.getElementById('owner').value.trim();
-            const repo = document.getElementById('repo').value.trim();
-            const branch = document.getElementById('branch').value.trim() || 'main';
-            const path = document.getElementById('path').value.trim();
-            const token = document.getElementById('token').value.trim();
+async function saveFile() {
+    const filename = filenameInput().trim();
+    if (!filename) return setStatus("❌ File name required", "#f87171");
 
-            if (!owner || !repo || !path) { showStatus('Owner, repo and file path are required.', false); return; }
+    const payload = {
+        message: `Save ${filename}`,
+        content: btoa(unescape(encodeURIComponent(editor().value))),
+        branch: BRANCH,
+        ...(currentFileSha && { sha: currentFileSha })
+    };
 
-            try {
-                showStatus('Loading file...', true, 0);
-                const res = await getFileFromGitHub(owner, repo, path, branch, token);
-                document.getElementById('editor').value = res.content;
-                // stash sha on the save button so updates include it
-                document.getElementById('saveBtn').dataset.sha = res.sha;
-                showStatus('File loaded successfully.', true);
-            } catch (err) {
-                console.error(err);
-                if (err && err.code === 404) showStatus('File not found. You can create it by clicking Save File.', false);
-                else showStatus('Failed to load file: ' + (err.message || JSON.stringify(err)), false);
-            }
+    try {
+        const res = await fetch(apiUrl(filename), {
+            method: "PUT",
+            ...auth(),
+            body: JSON.stringify(payload)
         });
+        if (!res.ok) throw new Error();
 
-        document.getElementById('saveBtn').addEventListener('click', async () => {
-            hideStatus();
-            const owner = document.getElementById('owner').value.trim();
-            const repo = document.getElementById('repo').value.trim();
-            const branch = document.getElementById('branch').value.trim() || 'main';
-            const path = document.getElementById('path').value.trim();
-            const token = document.getElementById('token').value.trim();
-            const content = document.getElementById('editor').value || '';
-            const sha = document.getElementById('saveBtn').dataset.sha;
+        const data = await res.json();
+        currentFileSha = data.content.sha;
+        setStatus("💾 File saved successfully", "#4ade80");
+    } catch {
+        setStatus("❌ Failed to save file", "#f87171");
+    }
+}
 
-            if (!owner || !repo || !path || !token) { showStatus('Owner, repo, path and token are required to save.', false); return; }
+function clearText() {
+    editor().value = "";
+    currentFileSha = null;
+    setStatus("🧹 Editor cleared", "#94a3b8");
+}
 
-            try {
-                showStatus('Saving file...', true);
-                // If a base64 data blob is prepared (for binary), use it directly
-                const preparedBase64 = document.getElementById('saveBtn').dataset.base64;
-                const mime = document.getElementById('saveBtn').dataset.mime;
-                const result = await putFileToGitHub(owner, repo, path, branch, token, content, `Saving ${path} via Cloud Notepad`, sha, preparedBase64, mime);
-                // Update stored sha for future edits
-                if (result && result.content && result.content.sha) {
-                    document.getElementById('saveBtn').dataset.sha = result.content.sha;
-                }
-                showStatus('File saved successfully.', true);
-            } catch (err) {
-                console.error(err);
-                showStatus('Failed to save file: ' + (err.message || JSON.stringify(err)), false);
-            }
-        });
+const apiUrl = f =>
+`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FOLDER}/${f}`;
 
-        document.getElementById('clearBtn').addEventListener('click', () => {
-            document.getElementById('editor').value = '';
-            // remove sha when clearing
-            delete document.getElementById('saveBtn').dataset.sha;
-            hideStatus();
-        });
+const auth = () => ({
+    headers: {
+        Authorization: `Bearer ${TOKEN}`,
+        Accept: "application/vnd.github.v3+json",
+        "Content-Type": "application/json"
+    }
+});
 
-        // Token sessionStorage helpers
-        const tokenInput = document.getElementById('token');
-        const saveTokenBtn = document.getElementById('saveTokenBtn');
-        const clearTokenBtn = document.getElementById('clearTokenBtn');
-        const TOKEN_KEY = 'cloud_notepad_pat';
+const editor = () => document.getElementById("editor");
+const filenameInput = () => document.getElementById("filename");
+</script>
 
-        // Toggle token visibility
-        const toggleTokenBtn = document.getElementById('toggleTokenBtn');
-        const toggleIcon = document.getElementById('toggleIcon');
-        toggleTokenBtn.addEventListener('click', (ev) => {
-            ev.preventDefault();
-            const isHidden = tokenInput.type === 'password';
-            if (isHidden) {
-                tokenInput.type = 'text';
-                toggleTokenBtn.setAttribute('aria-pressed','true');
-                toggleTokenBtn.setAttribute('aria-label','Hide token');
-                toggleTokenBtn.title = 'Hide token';
-                // eye-off icon
-                toggleIcon.innerHTML = '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.64 18.64 0 0 1 3.11-3.99"></path><path d="M1 1l22 22"></path>';
-            } else {
-                tokenInput.type = 'password';
-                toggleTokenBtn.setAttribute('aria-pressed','false');
-                toggleTokenBtn.setAttribute('aria-label','Show token');
-                toggleTokenBtn.title = 'Show token';
-                // eye icon
-                toggleIcon.innerHTML = '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle>';
-            }
-        });
-
-        // Local file upload handling
-        const chooseFileBtn = document.getElementById('chooseFileBtn');
-        const localFileInput = document.getElementById('localFileInput');
-        const uploadedPathEl = document.getElementById('uploadedPath');
-
-        chooseFileBtn.addEventListener('click', (ev) => {
-            ev.preventDefault();
-            localFileInput.click();
-        });
-
-        localFileInput.addEventListener('change', async (ev) => {
-            const file = ev.target.files && ev.target.files[0];
-            if (!file) return;
-            // suggest path: use original filename in repository root
-            const suggested = file.name;
-            document.getElementById('path').value = suggested;
-            uploadedPathEl.textContent = `Selected local file: ${file.name}`;
-            // if text file (by extension or type), load into editor for editing
-            const lower = file.name.toLowerCase();
-            const isText = lower.endsWith('.txt') || lower.endsWith('.md') || file.type.startsWith('text') || lower.endsWith('.json') || lower.endsWith('.csv');
-
-            // clear any prepared base64
-            delete document.getElementById('saveBtn').dataset.base64;
-
-            if (isText) {
-                try {
-                    const text = await file.text();
-                    document.getElementById('editor').value = text;
-                    showStatus('Loaded text file into editor. Edit then click Save to upload.', true);
-                } catch (e) {
-                    showStatus('Failed to read text file.', false);
-                }
-            } else {
-                // read as base64 for raw upload
-                try {
-                    const dataUrl = await new Promise((resolve, reject) => {
-                        const r = new FileReader();
-                        r.onload = () => resolve(r.result);
-                        r.onerror = reject;
-                        r.readAsDataURL(file);
-                    });
-                    // dataUrl = data:<mime>;base64,<base64data>
-                    const base64 = dataUrl.split(',')[1];
-                    // store on save button dataset for upload without re-encoding
-                    document.getElementById('saveBtn').dataset.base64 = base64;
-                    document.getElementById('saveBtn').dataset.mime = dataUrl.substring(dataUrl.indexOf(':')+1, dataUrl.indexOf(';'));
-                    showStatus('Binary file ready to upload. Click Save to upload the file to the repo.', true);
-                } catch (e) {
-                    showStatus('Failed to read file for upload.', false);
-                }
-            }
-        });
-
-        saveTokenBtn.addEventListener('click', () => {
-            const t = tokenInput.value.trim();
-            if (!t) { showStatus('Enter a token before saving it to session.', false); return; }
-            sessionStorage.setItem(TOKEN_KEY, t);
-            showStatus('Token saved to this browser session (sessionStorage).', true);
-        });
-
-        clearTokenBtn.addEventListener('click', () => {
-            sessionStorage.removeItem(TOKEN_KEY);
-            tokenInput.value = '';
-            showStatus('Token cleared from session and input.', true);
-        });
-
-        // Load token from sessionStorage automatically if present
-        (function loadTokenFromSession(){
-            const t = sessionStorage.getItem(TOKEN_KEY);
-            if (t) tokenInput.value = t;
-        })();
-
-        // Autosave behavior: when enabled, save on editor changes with debounce
-        const autosaveCheckbox = document.getElementById('autosave');
-        let autosaveTimer = null;
-        document.getElementById('editor').addEventListener('input', () => {
-            if (!autosaveCheckbox.checked) return;
-            if (autosaveTimer) clearTimeout(autosaveTimer);
-            autosaveTimer = setTimeout(() => { document.getElementById('saveBtn').click(); }, 1200);
-        });
-
-        // Shortcut for Cmd/Ctrl+S to save
-        window.addEventListener('keydown', (ev) => {
-            if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 's') {
-                ev.preventDefault();
-                document.getElementById('saveBtn').click();
-            }
-        });
-
-        // Helper: try to detect modern GitHub token prefix and warn if empty
-        (function attachTokenHint(){
-            tokenInput.addEventListener('input', () => {
-                if (tokenInput.value && !/^gh[pousr]_/i.test(tokenInput.value)) {
-                    // show a brief non-blocking hint
-                    showStatus('Note: GitHub tokens usually start with ghp_, gho_, ghr_, ghc_ or ghu_', true, 2500);
-                }
-            });
-        })();
-    </script>
 </body>
 </html>
